@@ -128,9 +128,11 @@ export class UsuarioService {
                 .pipe(
                   map((res: any) => {
 
-                    let usuarioDB: Usuario = res.usuario;
+                    if ( usuario._id === this.usuario._id ) {
+                      let usuarioDB: Usuario = res.usuario;
 
-                    this.guardarStorage(usuarioDB._id, this.token, usuarioDB);
+                      this.guardarStorage(usuarioDB._id, this.token, usuarioDB);
+                    }
 
                     Swal.fire({
                       title: 'Usuario actualizado',
@@ -144,7 +146,7 @@ export class UsuarioService {
   }
 
   cambiarImagen( archivo: File, id: string) {
-    
+
     this._subirArchivoService.subirArchivo(archivo, 'usuarios', id)
             .then( (res: any) => {
 
@@ -162,5 +164,41 @@ export class UsuarioService {
             .catch( res => {
               console.log(res);
             });
+  }
+
+  cargarUsuarios( desde: number = 0 ) {
+
+    let url = URL_SERVICIOS + '/usuario?desde=' + desde;
+
+    return this.http.get(url);
+
+  }
+
+  buscarUsuarios( termino: string ) {
+
+    let url = URL_SERVICIOS + '/busqueda/coleccion/usuarios/' + termino;
+
+    return this.http.get(url)
+                .pipe(
+                  map( (res: any) => res.usuarios)
+                );
+
+  }
+
+  borrarUsuario( id: string ) {
+
+    let url = URL_SERVICIOS + '/usuario/' + id + '?token=' + this.token;
+
+    return this.http.delete( url )
+                .pipe(
+                  map( (res: any) => {
+                    Swal.fire(
+                      'Usuario borrado!',
+                      'El usuario ha sido eliminado correctamente.',
+                      'success'
+                    );
+                    return true;
+                  })
+                )
   }
 }
